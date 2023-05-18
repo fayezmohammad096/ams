@@ -2,11 +2,14 @@ from django.shortcuts import render
 from django.http import HttpResponse
 # from django.template import loader
 import re
+from django.core.mail import send_mail
+
+from ams import settings
 # Create your views here.
 def index(request):
     # template = loader.get_template("auth/register.htlml")
     return render(request,'auth/register.html')
-
+# woring on 39_2 no videos..........
 def store(request):
     if(request.method=='POST'):
         uname = request.POST.get('uname')
@@ -26,5 +29,12 @@ def store(request):
         elif(valid==0):
             return HttpResponse("Email is not valid")
         else:
+            send_mail(
+                "User Registration",
+                "Your registration Done",
+                settings.EMAIL_HOST_USER,
+                [email],
+                fail_silently=False,
+            )
             return HttpResponse("Success")
 
