@@ -6,6 +6,6 @@ from django.urls import path
 from.import views as v
 urlpatterns = [
     # path('admin/', admin.site.urls),
-    path('register/', v.index),
+    path('', v.index),#localhost:port no/root dir
     path('store/', v.store, name='store'),
 ]

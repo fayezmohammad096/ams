@@ -3,13 +3,17 @@ from django.http import HttpResponse
 # from django.template import loader
 import re
 from django.core.mail import send_mail
+from django.template.loader import render_to_string #https://docs.djangoproject.com/en/4.2/topics/templates/
+from django.utils.html import strip_tags
+from django.core.mail import EmailMultiAlternatives #https://docs.djangoproject.com/en/4.2/topics/email/
+
 
 from ams import settings
 # Create your views here.
 def index(request):
     # template = loader.get_template("auth/register.htlml")
     return render(request,'auth/register.html')
-# woring on 39_2 no videos..........
+# working on 39_2 no videos..........
 def store(request):
     if(request.method=='POST'):
         uname = request.POST.get('uname')
@@ -29,12 +33,17 @@ def store(request):
         elif(valid==0):
             return HttpResponse("Email is not valid")
         else:
-            send_mail(
+            msg = "Check this varification link"
+            rendered = render_to_string("auth/reg_email.html", {"content": msg})
+            text_content = strip_tags(rendered)#remove html content
+            email= EmailMultiAlternatives(
                 "User Registration",
-                "Your registration Done",
+                text_content,
                 settings.EMAIL_HOST_USER,
                 [email],
-                fail_silently=False,
+                
             )
+            email.attach_alternative(rendered, "text/html")
+            email.send()
             return HttpResponse("Success")
 
