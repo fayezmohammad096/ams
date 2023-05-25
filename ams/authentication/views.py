@@ -10,7 +10,7 @@ from django.core.mail import EmailMultiAlternatives #https://docs.djangoproject.
 import datetime
 from cryptography.fernet import Fernet #https://www.geeksforgeeks.org/how-to-encrypt-and-decrypt-strings-in-python/
 from . import models
-
+import hashlib
 
 from ams import settings
 # Create your views here.
@@ -42,14 +42,10 @@ def store(request):
             # using now() to get current time
             current_time = str(datetime.datetime.now())
             v_key = uname+current_time
-
-            key = Fernet.generate_key()
- 
-            # Instance the Fernet class with the key
- 
-            fernet = Fernet(key)
-            encMessage = fernet.encrypt(v_key.encode())
-            encpassword = fernet.encrypt(password.encode())
+            encpassword = hashlib.md5(password.encode()) #password encryptons using lashlib.md5
+            encpassword = encpassword.hexdigest()
+            encMessage = hashlib.md5(v_key.encode()) #https://www.geeksforgeeks.org/md5-hash-python/
+            encMessage = encMessage.hexdigest()
             v_status = 0
             admin.name=uname
             admin.email = email
@@ -57,12 +53,12 @@ def store(request):
             admin.v_key = encMessage
             admin.v_status = v_status
             admin.save()
-            link = "http://127.0.0.1:8000/register/verification?v_key="+str(encMessage)
+            link = "http://127.0.0.1:8000/register/verification/"+str(encMessage)
             msg = "Check this varification link"
             rendered = render_to_string("auth/reg_email.html", {"content": msg,"link":link})
             text_content = strip_tags(rendered)#remove html content
             email= EmailMultiAlternatives(
-                "User Registration",
+                "User Registration Link",
                 text_content,
                 settings.EMAIL_HOST_USER,
                 [email],
@@ -71,4 +67,16 @@ def store(request):
             email.attach_alternative(rendered, "text/html")
             email.send()
             return HttpResponse("Success")
+
+def verify(request,v_key):
+    admin = models.Admins()
+    record = models.Admins.objects.get(v_key=v_key)
+    record.v_status = 1
+    
+    record.save(update_fields=['v_status'])
+    record.models.Admins.objects.get(v_key=v_key,v_status=1)
+    if(record):
+        return HttpResponse("verificaton status update")
+    else:
+        return HttpResponse("value not exists")
 
