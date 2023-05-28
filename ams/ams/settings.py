@@ -26,8 +26,8 @@ SECRET_KEY = 'django-insecure-7=$%jyty&6#!vvjek_3+xn!3^mli(cmc(m)37q@mk^*k%o42zz
 DEBUG = True
 #code for sending mail
 EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_HOST_USER = 'fayezmohammad096@gmail.com'
-EMAIL_HOST_PASSWORD = 'knlqsfsbrqpyxvbo'#generate app password from google_account
+EMAIL_HOST_USER = 'mdfaiz.nub@gmail.com'
+EMAIL_HOST_PASSWORD = 'tyrwuwecfhffiips'#generate app password from google_account
 EMAIL_PORT = 587 #TLS port
 EMAIL_USE_TLS = True
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     "authentication",
+    "brand",
 ]
 
 MIDDLEWARE = [
@@ -58,6 +59,10 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+AUTHENTICATION_BACKENDS = [
+    'ams.cus_auth.CustomAuthBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]
 ROOT_URLCONF = 'ams.urls'
 
 TEMPLATES = [

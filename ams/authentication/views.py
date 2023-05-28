@@ -11,8 +11,10 @@ import datetime
 from cryptography.fernet import Fernet #https://www.geeksforgeeks.org/how-to-encrypt-and-decrypt-strings-in-python/
 from . import models
 import hashlib
-
+from django.contrib.auth import authenticate, login
 from ams import settings
+
+
 # Create your views here.
 def index(request):
     
@@ -42,14 +44,15 @@ def store(request):
             # using now() to get current time
             current_time = str(datetime.datetime.now())
             v_key = uname+current_time
-            encpassword = hashlib.md5(password.encode()) #password encryptons using lashlib.md5
-            encpassword = encpassword.hexdigest()
+            # encpassword = hashlib.md5(password.encode()) #password encryptons using lashlib.md5
+            # encpassword = encpassword.hexdigest()
             encMessage = hashlib.md5(v_key.encode()) #https://www.geeksforgeeks.org/md5-hash-python/
             encMessage = encMessage.hexdigest()
             v_status = 0
             admin.name=uname
             admin.email = email
-            admin.password = encpassword
+            admin.password = password
+            # admin.password = encpassword
             admin.v_key = encMessage
             admin.v_status = v_status
             admin.save()
@@ -68,15 +71,30 @@ def store(request):
             email.send()
             return HttpResponse("Success")
 
-def verify(request,v_key):
-    admin = models.Admins()
+def verify(request, v_key):
+    admin  = models.Admins()
     record = models.Admins.objects.get(v_key=v_key)
     record.v_status = 1
-    
+    # if(len(record)==1):
     record.save(update_fields=['v_status'])
-    record.models.Admins.objects.get(v_key=v_key,v_status=1)
+    record = models.Admins.objects.get(v_key=v_key, v_status=1) 
     if(record):
-        return HttpResponse("verificaton status update")
-    else:
-        return HttpResponse("value not exists")
+        
+        return HttpResponse("verification status updated")
+def login(request):
+    return render(request,'auth/login.html')
 
+def login_auth(request):
+    if request.method == 'POST':
+        email = request.POST['email']
+        password = request.POST['pass']
+        user = authenticate(request, email=email, password=password)
+        #print("asdasda",user)
+        if user:
+            return HttpResponse("Login Success")
+        else:
+            return HttpResponse("login failed")
+
+    print("hello")
+    
+    # if(len(record)==1):
